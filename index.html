@@ -672,6 +672,54 @@
     @media (max-width: 600px) {
       .teams-grid { grid-template-columns: repeat(2, 1fr); }
     }
+  
+    /* Cores das equipes (Egyptian Tech) */
+    .team-card[data-team="0"] { background: #fae8e0; border-color: #e27d60; } /* Carnelian */
+    .team-card[data-team="1"] { background: #e0f2f1; border-color: #4db6ac; } /* Faience */
+    .team-card[data-team="2"] { background: #f3e5f5; border-color: #ba68c8; } /* Amethyst */
+    .team-card[data-team="3"] { background: #eceff1; border-color: #90a4ae; } /* Slate */
+    .team-card[data-team="4"] { background: #e8f5e9; border-color: #81c784; } /* Malachite */
+
+    /* Animação Shuffle do Deck */
+    .shuffle-card {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border-radius: inherit;
+      border: 3px solid var(--gold);
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      object-fit: cover;
+      clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+      z-index: 1;
+      opacity: 0;
+    }
+
+    .shuffling .shuffle-card {
+      opacity: 1;
+      animation: shuffleAnim 2s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+    }
+
+    .deck-wrapper.shuffling { pointer-events: none; }
+    .deck-wrapper.glow-pulse .deck-card {
+      animation: mainCardGlow 0.6s ease-out forwards;
+    }
+
+    @keyframes shuffleAnim {
+      0% { transform: translate(0, 0) translateZ(0) rotate(0deg); }
+      15% { transform: translate(var(--dx1), var(--dy1)) translateZ(10px) rotate(var(--rot1)); filter: blur(1px); }
+      30% { transform: translate(var(--dx2), var(--dy2)) translateZ(-10px) rotate(var(--rot2)); filter: blur(2px); }
+      50% { transform: translate(var(--dx3), var(--dy3)) translateZ(20px) rotate(var(--rot3)); filter: blur(1px); }
+      70% { transform: translate(var(--dx4), var(--dy4)) translateZ(-5px) rotate(var(--rot4)); filter: blur(0.5px); }
+      85% { transform: translate(var(--dx1), calc(var(--dy1) * -1)) translateZ(5px) rotate(calc(var(--rot1) * -1)); filter: blur(0px); }
+      100% { transform: translate(0, 0) translateZ(0) rotate(0deg); opacity: 0; }
+    }
+
+    @keyframes mainCardGlow {
+      0% { transform: scale(1); box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+      50% { transform: scale(1.08); box-shadow: 0 0 40px rgba(212, 175, 55, 0.9), 0 0 20px #fff; }
+      100% { transform: scale(1); box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+    }
+
   </style>
 </head>
 <body>
@@ -975,8 +1023,52 @@
 
     /* ----- FASE 1: Sorteador ----- */
     function onDeckClick() {
-      if (els.deckWrapper.classList.contains('disabled')) return;
+      if (els.deckWrapper.classList.contains('disabled') || els.deckWrapper.classList.contains('shuffling')) return;
 
+      els.deckWrapper.classList.add('shuffling');
+      
+      // Criar cartas falsas para o shuffle
+      const numCards = 8;
+      for (let i = 0; i < numCards; i++) {
+        const c = document.createElement('img');
+        c.src = 'imagens/verso.png';
+        c.className = 'shuffle-card';
+        
+        c.style.setProperty('--dx1', (Math.random() * 100 - 50) + 'px');
+        c.style.setProperty('--dy1', (Math.random() * 80 - 40) + 'px');
+        c.style.setProperty('--rot1', (Math.random() * 16 - 8) + 'deg');
+        
+        c.style.setProperty('--dx2', (Math.random() * 140 - 70) + 'px');
+        c.style.setProperty('--dy2', (Math.random() * 60 - 30) + 'px');
+        c.style.setProperty('--rot2', (Math.random() * 16 - 8) + 'deg');
+        
+        c.style.setProperty('--dx3', (Math.random() * 80 - 40) + 'px');
+        c.style.setProperty('--dy3', (Math.random() * 120 - 60) + 'px');
+        c.style.setProperty('--rot3', (Math.random() * 16 - 8) + 'deg');
+        
+        c.style.setProperty('--dx4', (Math.random() * 50 - 25) + 'px');
+        c.style.setProperty('--dy4', (Math.random() * 80 - 40) + 'px');
+        c.style.setProperty('--rot4', (Math.random() * 16 - 8) + 'deg');
+        
+        c.style.animationDelay = (i * 0.05) + 's';
+        
+        els.deckWrapper.appendChild(c);
+      }
+
+      setTimeout(() => {
+        els.deckWrapper.querySelectorAll('.shuffle-card').forEach(el => el.remove());
+        els.deckWrapper.classList.remove('shuffling');
+        
+        els.deckWrapper.classList.add('glow-pulse');
+        
+        setTimeout(() => {
+          els.deckWrapper.classList.remove('glow-pulse');
+          proceedWithReveal();
+        }, 600);
+      }, 2100);
+    }
+
+    function proceedWithReveal() {
       els.deckWrapper.classList.add('disabled');
 
       // 1. Screen shake agressivo
