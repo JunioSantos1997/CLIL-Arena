@@ -143,41 +143,19 @@
     }
 
     /* Deck com aura */
-    .deck-wrapper {
-      position: relative;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
+    
 
     .deck-wrapper:hover { transform: scale(1.03); }
     .deck-wrapper.disabled { pointer-events: none; cursor: default; }
 
-    .deck-aura {
-      position: absolute;
-      inset: -20px;
-      background: radial-gradient(circle, rgba(212, 175, 55, 0.4) 0%, transparent 70%);
-      animation: auraPulse 1.5s ease-in-out infinite;
-      pointer-events: none;
-    }
+    
 
     @keyframes auraPulse {
       0%, 100% { opacity: 0.5; transform: scale(1); }
       50% { opacity: 1; transform: scale(1.08); }
     }
 
-    .deck-card {
-      width: var(--card-w);
-      aspect-ratio: 3/4;
-      border: 3px solid var(--gold);
-      box-shadow:
-        0 0 15px rgba(212, 175, 55, 0.4),
-        inset 0 0 15px rgba(0, 180, 216, 0.2);
-      object-fit: cover;
-      display: block;
-      position: relative;
-      z-index: 2;
-      clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
-    }
+    
 
     /* Carta revelada */
     .revealed-card-container {
@@ -680,23 +658,63 @@
     .team-card[data-team="3"] { background: #eceff1; border-color: #90a4ae; } /* Slate */
     .team-card[data-team="4"] { background: #e8f5e9; border-color: #81c784; } /* Malachite */
 
-    /* Animação Shuffle do Deck */
+    /* Animação Shuffle do Deck 3D */
+    .deck-wrapper {
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.2s;
+      perspective: 1500px;
+      transform-style: preserve-3d;
+    }
+
+    .deck-aura {
+      position: absolute;
+      inset: -20px;
+      background: radial-gradient(circle, rgba(212, 175, 55, 0.4) 0%, transparent 70%);
+      animation: auraPulse 1.5s ease-in-out infinite;
+      pointer-events: none;
+      transform: translateZ(-200px);
+    }
+
+    .deck-card {
+      width: var(--card-w);
+      aspect-ratio: 3/4;
+      border: 3px solid var(--gold);
+      box-shadow:
+        0 0 15px rgba(212, 175, 55, 0.4),
+        inset 0 0 15px rgba(0, 180, 216, 0.2);
+      object-fit: cover;
+      display: block;
+      position: relative;
+      clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+      z-index: 5;
+    }
+
+    .shuffling .deck-card {
+      animation: mainCardShake3D 0.4s ease-in-out infinite alternate;
+    }
+
+    @keyframes mainCardShake3D {
+      0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+      50% { transform: translate3d(5px, -5px, -10px) rotate(2deg); }
+      100% { transform: translate3d(-5px, 5px, 10px) rotate(-2deg); }
+    }
+
     .shuffle-card {
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
       border-radius: inherit;
       border: 3px solid var(--gold);
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 5px 25px rgba(0,0,0,0.4);
       object-fit: cover;
       clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
-      z-index: 1;
       opacity: 0;
     }
 
     .shuffling .shuffle-card {
       opacity: 1;
-      animation: shuffleAnim 2s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+      animation: shuffleAnim3D 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
     }
 
     .deck-wrapper.shuffling { pointer-events: none; }
@@ -704,22 +722,21 @@
       animation: mainCardGlow 0.6s ease-out forwards;
     }
 
-    @keyframes shuffleAnim {
-      0% { transform: translate(0, 0) translateZ(0) rotate(0deg); }
-      15% { transform: translate(var(--dx1), var(--dy1)) translateZ(10px) rotate(var(--rot1)); filter: blur(1px); }
-      30% { transform: translate(var(--dx2), var(--dy2)) translateZ(-10px) rotate(var(--rot2)); filter: blur(2px); }
-      50% { transform: translate(var(--dx3), var(--dy3)) translateZ(20px) rotate(var(--rot3)); filter: blur(1px); }
-      70% { transform: translate(var(--dx4), var(--dy4)) translateZ(-5px) rotate(var(--rot4)); filter: blur(0.5px); }
-      85% { transform: translate(var(--dx1), calc(var(--dy1) * -1)) translateZ(5px) rotate(calc(var(--rot1) * -1)); filter: blur(0px); }
-      100% { transform: translate(0, 0) translateZ(0) rotate(0deg); opacity: 0; }
+    @keyframes shuffleAnim3D {
+      0% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      25% { transform: translate3d(var(--tx1), var(--ty1), var(--tz1)) rotate(var(--r1)); }
+      50% { transform: translate3d(var(--tx2), var(--ty2), var(--tz2)) rotate(var(--r2)); }
+      75% { transform: translate3d(var(--tx3), var(--ty3), var(--tz3)) rotate(var(--r3)); }
+      90% { transform: translate3d(var(--tx4), var(--ty4), var(--tz4)) rotate(var(--r4)); opacity: 1; }
+      100% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
     }
 
     @keyframes mainCardGlow {
       0% { transform: scale(1); box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
-      50% { transform: scale(1.08); box-shadow: 0 0 40px rgba(212, 175, 55, 0.9), 0 0 20px #fff; }
+      50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(212, 175, 55, 1), 0 0 30px #fff; }
       100% { transform: scale(1); box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
     }
-
   </style>
 </head>
 <body>
@@ -741,7 +758,10 @@
       <div class="revealed-card-container" id="revealed-container">
         <img src="" alt="Matéria sorteada" class="revealed-card" id="revealed-img">
         <span class="theme-label" id="theme-label"></span>
-        <button class="btn-giant" id="btn-start">Start Challenge</button>
+        <div style="display: flex; gap: 15px; justify-content: center; margin-top: 10px;">
+          <button class="btn-giant" id="btn-start">Start Challenge</button>
+          <button class="btn-reroll" id="btn-reroll" title="Reshuffle the deck">Reroll (<span id="reroll-count">3</span>)</button>
+        </div>
       </div>
     </section>
 
@@ -976,8 +996,9 @@
       teamNames: [],
       teamScores: [],
       teamMembers: [],          // Array de arrays: membros de cada equipe [{id, name}]
-      pickedSpeakerIds: [],     // ID do membro sorteado como orador por equipe
-      pickingSpeaker: []        // Bloqueia clique duplo durante animação
+            pickedSpeakerIds: [],     // ID do membro sorteado como orador por equipe
+      pickingSpeaker: [],       // Bloqueia clique duplo durante animao
+      rerollsLeft: 3
     };
 
     let memberIdCounter = 0;
@@ -1002,7 +1023,9 @@
       quizOptionsDisplay: $('#quiz-options-display'),
       teamsGrid: $('#teams-grid'),
       teamsStatus: $('#teams-status'),
-      btnNext: $('#btn-next')
+      btnNext: $('#btn-next'),
+      btnReroll: $('#btn-reroll'),
+      rerollCount: $('#reroll-count')
     };
 
     /* ----- Inicialização ----- */
@@ -1017,6 +1040,7 @@
       els.deckWrapper.addEventListener('click', onDeckClick);
       els.btnStart.addEventListener('click', onStartChallenge);
       els.btnNext.addEventListener('click', onNextRound);
+      els.btnReroll.addEventListener('click', onReroll);
 
       buildTeamsGrid();
     }
@@ -1027,30 +1051,38 @@
 
       els.deckWrapper.classList.add('shuffling');
       
-      // Criar cartas falsas para o shuffle
-      const numCards = 8;
+      // Criar cartas falsas para o shuffle 3D
+      const numCards = 12; // Mais cartas para volume
       for (let i = 0; i < numCards; i++) {
         const c = document.createElement('img');
         c.src = 'imagens/verso.png';
         c.className = 'shuffle-card';
         
-        c.style.setProperty('--dx1', (Math.random() * 100 - 50) + 'px');
-        c.style.setProperty('--dy1', (Math.random() * 80 - 40) + 'px');
-        c.style.setProperty('--rot1', (Math.random() * 16 - 8) + 'deg');
+        // Direção alternada (esq/dir) para o shuffle
+        const dir = i % 2 === 0 ? 1 : -1;
         
-        c.style.setProperty('--dx2', (Math.random() * 140 - 70) + 'px');
-        c.style.setProperty('--dy2', (Math.random() * 60 - 30) + 'px');
-        c.style.setProperty('--rot2', (Math.random() * 16 - 8) + 'deg');
+        // Posições extremas com grande variação em Z (frente e fundo)
+        c.style.setProperty('--tx1', (Math.random() * 180 * dir) + 'px');
+        c.style.setProperty('--ty1', (Math.random() * 80 - 40) + 'px');
+        c.style.setProperty('--tz1', (Math.random() * 150 + 50) + 'px'); // Frente
+        c.style.setProperty('--r1', (Math.random() * 30 * dir) + 'deg');
         
-        c.style.setProperty('--dx3', (Math.random() * 80 - 40) + 'px');
-        c.style.setProperty('--dy3', (Math.random() * 120 - 60) + 'px');
-        c.style.setProperty('--rot3', (Math.random() * 16 - 8) + 'deg');
+        c.style.setProperty('--tx2', (Math.random() * 180 * -dir) + 'px');
+        c.style.setProperty('--ty2', (Math.random() * 80 - 40) + 'px');
+        c.style.setProperty('--tz2', (Math.random() * -150 - 50) + 'px'); // Fundo
+        c.style.setProperty('--r2', (Math.random() * 30 * -dir) + 'deg');
         
-        c.style.setProperty('--dx4', (Math.random() * 50 - 25) + 'px');
-        c.style.setProperty('--dy4', (Math.random() * 80 - 40) + 'px');
-        c.style.setProperty('--rot4', (Math.random() * 16 - 8) + 'deg');
+        c.style.setProperty('--tx3', (Math.random() * 120 * dir) + 'px');
+        c.style.setProperty('--ty3', (Math.random() * 60 - 30) + 'px');
+        c.style.setProperty('--tz3', (Math.random() * 100 + 20) + 'px'); // Frente
+        c.style.setProperty('--r3', (Math.random() * 15 * dir) + 'deg');
         
-        c.style.animationDelay = (i * 0.05) + 's';
+        c.style.setProperty('--tx4', (Math.random() * 60 * -dir) + 'px');
+        c.style.setProperty('--ty4', (Math.random() * 40 - 20) + 'px');
+        c.style.setProperty('--tz4', (Math.random() * -100 - 20) + 'px'); // Fundo
+        c.style.setProperty('--r4', (Math.random() * 10 * -dir) + 'deg');
+        
+        c.style.animationDelay = (i * 0.04) + 's';
         
         els.deckWrapper.appendChild(c);
       }
@@ -1134,6 +1166,30 @@
       }
 
       setTimeout(() => { container.innerHTML = ''; }, 700);
+    }
+
+    /* ----- Reroll ----- */
+    function onReroll() {
+      if (state.rerollsLeft <= 0) return;
+      
+      state.rerollsLeft--;
+      els.rerollCount.textContent = state.rerollsLeft;
+      
+      if (state.rerollsLeft === 0) {
+        els.btnReroll.disabled = true;
+      }
+
+      // Hide revealed card
+      els.revealedContainer.classList.remove('show');
+      els.revealedImg.src = '';
+      
+      // Restore deck to trigger animation again
+      els.deckWrapper.style.display = '';
+      els.deckInstruction.style.display = '';
+      els.deckWrapper.classList.remove('disabled');
+
+      // Trigger the shuffle animation and random pick immediately
+      onDeckClick();
     }
 
     /* ----- Transição para FASE 2 ----- */
